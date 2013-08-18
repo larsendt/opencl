@@ -1,6 +1,7 @@
 #lang at-exp racket/base
 
 (require ffi/unsafe
+         ffi/unsafe/cvector
          (except-in racket/contract ->)
          (prefix-in c: racket/contract)
          scribble/srcdoc
