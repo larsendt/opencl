@@ -10,7 +10,7 @@
 
 (define-syntax-rule (define-ctype-numeric-predicate id min max)
   (begin (define (id x) (and (number? x) (<= min x max)))
-         (provide/doc 
+         (provide/doc
           (thing-doc id flat-contract?
                      @{A contract for numbers between @racket['min] and @racket['max].}))))
 
@@ -67,6 +67,10 @@
   (CL_PLATFORM_PROFILE CL_PLATFORM_VERSION CL_PLATFORM_NAME CL_PLATFORM_VENDOR CL_PLATFORM_EXTENSIONS))
 
 (define-opencl-alias _cl_bitfield _cl_ulong _cl_ulong/c)
+
+(define-opencl-alias _cl_gl_object_type _cl_uint _cl_uint/c)
+(define-opencl-alias _cl_gl_texture_info _cl_uint _cl_uint/c)
+(define-opencl-alias _cl_gl_context_info _cl_uint _cl_uint/c)
 
 (define-opencl-pointer _cl_device_id)
 
@@ -132,11 +136,11 @@
 
 (define-opencl-pointer _cl_sampler)
 
-(define-opencl-enum 
+(define-opencl-enum
   _cl_addressing_mode _cl_uint _cl_addressing_mode-values _cl_addressing_mode/c
   (CL_ADDRESS_REPEAT CL_ADDRESS_CLAMP_TO_EDGE CL_ADDRESS_CLAMP CL_ADDRESS_NONE))
 
-(define-opencl-enum 
+(define-opencl-enum
   _cl_filter_mode _cl_uint _cl_filter_mode-values _cl_filter_mode/c
   (CL_FILTER_NEAREST CL_FILTER_LINEAR))
 
