@@ -15,25 +15,109 @@
              scribble/manual
              (for-label "types.rkt"))
 
-(define-opencl-info clGetGLContextInfoKHR
+#|
+(define-opencl clGetExtensionFunctionAddress
+  (_fun [funcname : _string]
+        -> [funcptr : (_or-null _pointer)]
+        ->
+        (cond
+          [(not funcptr)
+           (error 'clGetExtensionFunctionAddress "~e is not supported by the OpenCL implementation" funcname)]
+          [else
+            funcptr])))
+
+; Since this is an opencl extension function, we'll have to
+; do things a little differently. The pointer to the function
+; can be obtained with eclGetExtensionFunctionAddress
+(provide clGetGLContextInfoKHR:length
+         clGetGLContextInfoKHR:generic)
+(define (clGetGLContextInfoKHR:length properties
+                                      param_name)
+  (define actual-function
+    (cast (clGetExtensionFunctionAddress "clGetGLContextInfoKHR")
+          _pointer
+          (_fun [properties : (_vector i _cl_context_properties)]
+                [param_name : _cl_gl_context_info]
+                [param_value_size : _size_t]
+                [param_value : (_vector o _cl_device_id param_value_size)]
+                [param_value_size_ret : (_ptr o _size_t)]
+                -> [status : _cl_int]
+                -> (cond
+                     [(= status CL_SUCCESS)
+                      param_value_size_ret]
+                     [(= status CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR)
+                      (error 'clGetGLContextInfoKHR:length "CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR")]
+                     [(= status CL_INVALID_OPERATION)
+                      (error 'clGetGLContextInfoKHR:length "CL_INVALID_OPERATION")]
+                     [(= status CL_INVALID_VALUE)
+                      (error 'clGetGLContextInfoKHR:length "CL_INVALID_VALUE")]
+                     [(= status CL_OUT_OF_RESOURCES)
+                      (error 'clGetGLContextInfoKHR:length "CL_OUT_OF_RESOURCES")]
+                     [(= status CL_OUT_OF_HOST_MEMORY)
+                      (error 'clGetGLContextInfoKHR:length "CL_OUT_OF_HOST_MEMORY")]
+                     [else
+                       (error 'clGetGLContextInfoKHR:length "Unknown error code: ~e" status)]))))
+  (actual-function properties param_name 32))
+
+(define (clGetGLContextInfoKHR:generic properties
+                                       param_name)
+  (cond
+    [(not (= param_name CL_DEVICES_FOR_GL_CONTEXT_KHR))
+     (error 'clGetGLContextInfoKHR:generic "CL_DEVICES_FOR_GL_CONTEXT_KHR is the only supported param_name")])
+
+  (define actual-function
+    (cast (clGetExtensionFunctionAddress "clGetGLContextInfoKHR")
+          _pointer
+          (_fun [properties : (_vector i _cl_context_properties)]
+                [param_name : _cl_gl_context_info]
+                [param_value_size : _size_t]
+                [param_value : (_vector o _cl_device_id param_value_size)]
+                [param_value_size_ret : _pointer = #f]
+                -> [status : _cl_int]
+                -> (cond
+                     [(= status CL_SUCCESS)
+                       param_value]
+                     [(= status CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR)
+                      (error 'clGetGLContextInfoKHR:generic "CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR")]
+                     [(= status CL_INVALID_OPERATION)
+                      (error 'clGetGLContextInfoKHR:generic "CL_INVALID_OPERATION")]
+                     [(= status CL_INVALID_VALUE)
+                      (error 'clGetGLContextInfoKHR:generic "CL_INVALID_VALUE")]
+                     [(= status CL_OUT_OF_RESOURCES)
+                      (error 'clGetGLContextInfoKHR:generic "CL_OUT_OF_RESOURCES")]
+                     [(= status CL_OUT_OF_HOST_MEMORY)
+                      (error 'clGetGLContextInfoKHR:generic "CL_OUT_OF_HOST_MEMORY")]
+                     [else
+                       (error 'clGetGLContextInfoKHR:length "Unknown error code: ~e" status)]))))
+  (actual-function properties param_name 32))|#
+
+(provide clGetGLContextInfoKHR:length
+         clGetGLContextInfoKHR:generic)
+
+(define-opencl-info-extension
+  clGetGLContextInfoKHR
   (clGetGLContextInfoKHR:length clGetGLContextInfoKHR:generic)
-  _cl_gl_context_info _cl_gl_context_info/c
-  (args [properties : _cl_context_properties _cl_context_properties/c])
+  _cl_gl_context_info cl_gl_context_info/c
+  (args [properties : (_vector i _cl_context_properties)])
   (error status
-         (cond [(= status CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR)
-                (error 'clGetGLContextInfoKHR "the specified display and context attributes do not identify a valid context OR the specified context does not support buffer and renderbuffer objects OR the specified context is not compatible with the OpenCL context being created OR a share group was specified for a CGL-based OpenGL implementation, and the specified share group does not identify a valid CGL share group object")]
-               [(= status CL_INVALID_OPERATION)
-                (error 'clGetGLContextInfoKHR "a context or share group was specified and the OpenGL implemetation does not support that window-system binding API OR more than one of the attributes CL_CGL_SHAREGROUP_KHR, CL_EGL_DISPLAY_KHR, CL_GLX_DISPLAY_KHR, and CL_WGL_HDC_KHR is set to a non-default value OR both of the attributes CL_CGL_SHAREGROUP_KHR and CL_GL_CONTEXT_KHR are set to non-default values OR at least one of the specified devices cannot support OpenCL objects which share the data store of an OpenGL object")]
-               [(= status CL_INVALID_VALUE)
-                (error 'clGetGLContextInfoKHR "an invalid attribute name was specified in properties OR param_name is invalid OR param_value_size is less than the return type size and param_value is not NULL")]))
+         (cond
+           [(= status CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR)
+            (error 'clGetGLContextInfoKHR "CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR")]
+           [(= status CL_INVALID_OPERATION)
+            (error 'clGetGLContextInfoKHR "CL_INVALID_OPERATION")]
+           [(= status CL_INVALID_VALUE)
+            (error 'clGetGLContextInfoKHR "CL_INVALID_VALUE")]
+           [else
+             (error 'clGetGLContextInfoKHR "Undefined error: ~e" status)]))
   (variable
     param_value_size
-    [_cl_device_id* (_cvector o _cl_device_id param_value_size)
-                   (make-cvector _cl_device_id 0)
-                   _cl_device_id_vector/c
-                   CL_DEVICES_FOR_GL_CONTEXT_KHR])
-  (fixed [_cl_device_id _cl_device_id/c
-                        CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR]))
+    [_cl_device_id*
+      (_cvector o _cl_device_id param_value_size) (make-cvector _cl_device_id 0)
+      _cl_device_id_vector/c
+      CL_DEVICES_FOR_GL_CONTEXT_KHR])
+  (fixed
+    [_cl_device_id _cl_device_id/c
+                   CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR]))
 
 (define-opencl clCreateFromGLBuffer
   (_fun [context : _cl_context]

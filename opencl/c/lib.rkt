@@ -21,4 +21,29 @@
     [(_ id internal-id ty)
      (define id (get-ffi-obj 'internal-id opencl-lib ty))]))
 
-(provide define-opencl)
+(define (get-opencl-extension id ty)
+  (define clGetExtensionFunctionAddress
+    (get-ffi-obj 'clGetExtensionFunctionAddress
+                 opencl-lib
+                 (_fun [funcname : _string]
+                       -> [funcptr : (_or-null _pointer)]
+                       ->
+                       (cond
+                         [(not funcptr)
+                          (error 'clGetExtensionFunctionAddress "~e is not supported by the OpenCL implementation" funcname)]
+                         [else
+                           funcptr]))))
+  (cast
+    (clGetExtensionFunctionAddress (symbol->string id))
+    _pointer
+    ty))
+
+(define-syntax define-opencl-extension
+  (syntax-rules ()
+    [(_ id ty)
+     (define-opencl-extension id id ty)]
+    [(_ id internal-id ty)
+     (define id (get-opencl-extension 'internal-id ty))]))
+
+(provide define-opencl
+         define-opencl-extension)
