@@ -1,6 +1,7 @@
 #lang at-exp racket/base
 
 (require ffi/unsafe
+         ffi/cvector
          ffi/unsafe/cvector
          (except-in racket/contract ->)
          (prefix-in c: racket/contract)
@@ -15,90 +16,11 @@
              scribble/manual
              (for-label "types.rkt"))
 
-#|
-(define-opencl clGetExtensionFunctionAddress
-  (_fun [funcname : _string]
-        -> [funcptr : (_or-null _pointer)]
-        ->
-        (cond
-          [(not funcptr)
-           (error 'clGetExtensionFunctionAddress "~e is not supported by the OpenCL implementation" funcname)]
-          [else
-            funcptr])))
-
-; Since this is an opencl extension function, we'll have to
-; do things a little differently. The pointer to the function
-; can be obtained with eclGetExtensionFunctionAddress
-(provide clGetGLContextInfoKHR:length
-         clGetGLContextInfoKHR:generic)
-(define (clGetGLContextInfoKHR:length properties
-                                      param_name)
-  (define actual-function
-    (cast (clGetExtensionFunctionAddress "clGetGLContextInfoKHR")
-          _pointer
-          (_fun [properties : (_vector i _cl_context_properties)]
-                [param_name : _cl_gl_context_info]
-                [param_value_size : _size_t]
-                [param_value : (_vector o _cl_device_id param_value_size)]
-                [param_value_size_ret : (_ptr o _size_t)]
-                -> [status : _cl_int]
-                -> (cond
-                     [(= status CL_SUCCESS)
-                      param_value_size_ret]
-                     [(= status CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR)
-                      (error 'clGetGLContextInfoKHR:length "CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR")]
-                     [(= status CL_INVALID_OPERATION)
-                      (error 'clGetGLContextInfoKHR:length "CL_INVALID_OPERATION")]
-                     [(= status CL_INVALID_VALUE)
-                      (error 'clGetGLContextInfoKHR:length "CL_INVALID_VALUE")]
-                     [(= status CL_OUT_OF_RESOURCES)
-                      (error 'clGetGLContextInfoKHR:length "CL_OUT_OF_RESOURCES")]
-                     [(= status CL_OUT_OF_HOST_MEMORY)
-                      (error 'clGetGLContextInfoKHR:length "CL_OUT_OF_HOST_MEMORY")]
-                     [else
-                       (error 'clGetGLContextInfoKHR:length "Unknown error code: ~e" status)]))))
-  (actual-function properties param_name 32))
-
-(define (clGetGLContextInfoKHR:generic properties
-                                       param_name)
-  (cond
-    [(not (= param_name CL_DEVICES_FOR_GL_CONTEXT_KHR))
-     (error 'clGetGLContextInfoKHR:generic "CL_DEVICES_FOR_GL_CONTEXT_KHR is the only supported param_name")])
-
-  (define actual-function
-    (cast (clGetExtensionFunctionAddress "clGetGLContextInfoKHR")
-          _pointer
-          (_fun [properties : (_vector i _cl_context_properties)]
-                [param_name : _cl_gl_context_info]
-                [param_value_size : _size_t]
-                [param_value : (_vector o _cl_device_id param_value_size)]
-                [param_value_size_ret : _pointer = #f]
-                -> [status : _cl_int]
-                -> (cond
-                     [(= status CL_SUCCESS)
-                       param_value]
-                     [(= status CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR)
-                      (error 'clGetGLContextInfoKHR:generic "CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR")]
-                     [(= status CL_INVALID_OPERATION)
-                      (error 'clGetGLContextInfoKHR:generic "CL_INVALID_OPERATION")]
-                     [(= status CL_INVALID_VALUE)
-                      (error 'clGetGLContextInfoKHR:generic "CL_INVALID_VALUE")]
-                     [(= status CL_OUT_OF_RESOURCES)
-                      (error 'clGetGLContextInfoKHR:generic "CL_OUT_OF_RESOURCES")]
-                     [(= status CL_OUT_OF_HOST_MEMORY)
-                      (error 'clGetGLContextInfoKHR:generic "CL_OUT_OF_HOST_MEMORY")]
-                     [else
-                       (error 'clGetGLContextInfoKHR:length "Unknown error code: ~e" status)]))))
-  (actual-function properties param_name 32))|#
-
-(provide clGetGLContextInfoKHR:length
-         clGetGLContextInfoKHR:generic)
-
 (define-opencl-info-extension
   clGetGLContextInfoKHR
   (clGetGLContextInfoKHR:length clGetGLContextInfoKHR:generic)
-  _cl_gl_context_info cl_gl_context_info/c
-  (args [properties : (_vector i _cl_context_properties)])
+  _cl_gl_context_info _cl_gl_context_info/c
+  (args [properties : (_vector i _cl_context_properties) (vectorof _cl_context_properties/c)])
   (error status
          (cond
            [(= status CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR)

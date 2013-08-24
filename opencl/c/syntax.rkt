@@ -213,7 +213,7 @@
            ...
            (hash-set!* id-selector-map '_ftype 'fparam_name ...)
            ...
-           (define (id:selector _arg_type ... _param_type)
+           (define (id:selector arg_id ... _param_type)
              (case (hash-ref id-selector-map _param_type #f)
                [(_vtype)
                 (local [(define len (id:length _arg_type ... _param_type))]
