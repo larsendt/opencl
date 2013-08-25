@@ -68,10 +68,6 @@
 
 (define-opencl-alias _cl_bitfield _cl_ulong _cl_ulong/c)
 
-(define-opencl-alias _cl_gl_object_type _cl_uint _cl_uint/c)
-(define-opencl-alias _cl_gl_texture_info _cl_uint _cl_uint/c)
-(define-opencl-alias _cl_gl_context_info _cl_uint _cl_uint/c)
-
 (define-opencl-pointer _cl_device_id)
 
 (define-opencl-bitfield
@@ -157,6 +153,18 @@
 (define-opencl-enum _cl_context_info _cl_uint
   _cl_context_info-values _cl_context_info/c
   (CL_CONTEXT_REFERENCE_COUNT CL_CONTEXT_DEVICES CL_CONTEXT_PROPERTIES))
+
+(define-opencl-enum _cl_gl_context_info _cl_uint
+  _cl_gl_context_info-values _cl_gl_context_info/c
+  (CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR CL_DEVICES_FOR_GL_CONTEXT_KHR))
+
+(define-opencl-enum _cl_gl_texture_info _cl_uint
+  _cl_gl_texture_info-values _cl_gl_texture_info/c
+  (CL_GL_TEXTURE_TARGET CL_GL_MIPMAP_LEVEL))
+
+(define-opencl-enum _cl_gl_object_type _cl_uint
+  _cl_gl_object_type-values _cl_gl_object_type/c
+  (CL_GL_OBJECT_BUFFER CL_GL_OBJECT_TEXTURE2D CL_GL_OBJECT_TEXTURE3D CL_GL_OBJECT_RENDERBUFFER))
 
 (define-opencl-enum
   _cl_command_queue_info _cl_uint _cl_command_queue_info-values _cl_command_queue_info/c
