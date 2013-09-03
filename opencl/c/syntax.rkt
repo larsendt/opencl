@@ -160,8 +160,8 @@
              (_fun [arg_id : _arg_type]
                    ...
                    [param_name : _param_type]
-                   [param_value_size : _size_t = 0]
-                   [param_value : _pointer = #f]
+                   [param_value_size : _size_t = (ctype-sizeof _cl_device_id)]
+                   [param_value : (_ptr o _cl_device_id)]
                    [param_value_size_ret : (_ptr o _size_t)]
                    -> [status : _cl_int]
                    -> (id-return status (lambda () param_value_size_ret))))

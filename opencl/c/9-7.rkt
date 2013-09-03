@@ -34,12 +34,14 @@
   (variable
     param_value_size
     [_cl_device_id*
-      (_cvector o _cl_device_id param_value_size) (make-cvector _cl_device_id 0)
+      (_cvector o _cl_device_id param_value_size)
+      (make-cvector _cl_device_id 0)
       _cl_device_id_vector/c
       CL_DEVICES_FOR_GL_CONTEXT_KHR])
   (fixed
-    [_cl_device_id _cl_device_id/c
-                   CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR]))
+    [_cl_device_id
+      _cl_device_id/c
+      CL_CURRENT_DEVICE_FOR_GL_CONTEXT_KHR]))
 
 (define-opencl clCreateFromGLBuffer
   (_fun [context : _cl_context]
@@ -237,10 +239,10 @@
 
 (define-opencl clEnqueueAcquireGLObjects
   (_fun [command_queue : _cl_command_queue]
-        [num_objects : _cl_uint]
-        [mem_objects : (_ptr i _cl_mem)]
-        [num_events_in_wait_list : _cl_uint]
-        [event_wait_list : (_ptr i _cl_event/null)]
+        [num_objects : _cl_uint = (vector-length mem_objects)]
+        [mem_objects : (_vector i _cl_mem)]
+        [num_events_in_wait_list : _cl_uint = (vector-length event_wait_list)]
+        [event_wait_list : (_vector i _cl_event/null)]
         [event : (_ptr o _cl_event/null)]
         -> [errcode_ret : _cl_int]
         ->
@@ -271,15 +273,11 @@
   (proc-doc/names
     clEnqueueAcquireGLObjects
     (c:-> _cl_command_queue/c
-          _cl_uint/c
-          _cl_mem/c
-          _cl_uint/c
-          _cl_event/null/c
+          (vectorof _cl_mem/c)
+          (vectorof _cl_event/c)
           _cl_event/null/c)
     (command_queue
-      num_objects
       mem_objects
-      num_events_in_wait_ist
       event_wait_list)
     @{}))
 
@@ -288,10 +286,10 @@
 
 (define-opencl clEnqueueReleaseGLObjects
   (_fun [command_queue : _cl_command_queue]
-        [num_objects : _cl_uint]
-        [mem_objects : (_ptr i _cl_mem)]
-        [num_events_in_wait_list : _cl_uint]
-        [event_wait_list : (_ptr i _cl_event/null)]
+        [num_objects : _cl_uint = (vector-length mem_objects)]
+        [mem_objects : (_vector i _cl_mem)]
+        [num_events_in_wait_list : _cl_uint = (vector-length event_wait_list)]
+        [event_wait_list : (_vector i _cl_event/null)]
         [event : (_ptr o _cl_event/null)]
         -> [errcode_ret : _cl_int]
         ->
@@ -322,15 +320,11 @@
   (proc-doc/names
     clEnqueueReleaseGLObjects
     (c:-> _cl_command_queue/c
-          _cl_uint/c
-          _cl_mem/c
-          _cl_uint/c
-          _cl_event/null/c
+          (vectorof _cl_mem/c)
+          (vectorof _cl_event/null/c)
           _cl_event/null/c)
     (command_queue
-      num_objects
       mem_objects
-      num_events_in_wait_ist
       event_wait_list)
     @{}))
 
