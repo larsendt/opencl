@@ -242,7 +242,7 @@
         [num_objects : _cl_uint = (vector-length mem_objects)]
         [mem_objects : (_vector i _cl_mem)]
         [num_events_in_wait_list : _cl_uint = (vector-length event_wait_list)]
-        [event_wait_list : (_vector i _cl_event/null)]
+        [event_wait_list : (_vector i _cl_event)]
         [event : (_ptr o _cl_event/null)]
         -> [errcode_ret : _cl_int]
         ->
@@ -274,7 +274,7 @@
     clEnqueueAcquireGLObjects
     (c:-> _cl_command_queue/c
           (vectorof _cl_mem/c)
-          (vectorof _cl_event/c)
+          (vectorof _cl_event/null/c)
           _cl_event/null/c)
     (command_queue
       mem_objects
