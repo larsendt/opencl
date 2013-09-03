@@ -216,13 +216,13 @@
            (define (id:selector arg_id ... _param_type)
              (case (hash-ref id-selector-map _param_type #f)
                [(_vtype)
-                (local [(define len (id:length _arg_type ... _param_type))]
+                (local [(define len (id:length arg_id ... _param_type))]
                   (if (zero? len)
                       _vtype-default
-                      (id:_vtype _arg_type ... _param_type len)))]
+                      (id:_vtype arg_id ... _param_type len)))]
                ...
                [(_ftype)
-                (id:_ftype _arg_type ... _param_type)]
+                (id:_ftype arg_id ... _param_type)]
                ...
                [else
                 (error 'id:selector "Invalid parameter: ~e" _param_type)]))
